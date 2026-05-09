@@ -1,95 +1,102 @@
-import { saveFile, getDirectoryPath, fileExists, deleteFile, StorageLocation } from 'expo-native-file-saver';
+import { saveFile, openFilePicker, readFile, fileExists, deleteFile } from 'expo-native-file-saver';
 import { useState } from 'react';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Platform,
+  Alert, Platform, ScrollView,
+  StyleSheet, Text, TextInput,
+  TouchableOpacity, View,
 } from 'react-native';
-
-const LOCATIONS: StorageLocation[] = ['downloads', 'documents', 'pictures', 'cache'];
 
 export default function App() {
   const [fileName, setFileName] = useState('my-file.txt');
-  const [content, setContent] = useState('Hello from expo-native-file-saver! 🎉\nThis file was saved natively.');
-  const [location, setLocation] = useState<StorageLocation>('downloads');
-  const [subDir, setSubDir] = useState('');
-  const [lastSavedPath, setLastSavedPath] = useState('');
-  const [dirPath, setDirPath] = useState('');
+  const [content, setContent] = useState('Hello from expo-native-file-saver!\nThis file was saved natively.');
+  const [lastSavedUri, setLastSavedUri] = useState('');
   const [log, setLog] = useState<string[]>([]);
 
   const addLog = (msg: string) =>
     setLog(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 19)]);
 
-  const handleSaveText = async () => {
+  // ---- Save with native GUI dialog (SAF) ----
+  const handleSaveWithDialog = async () => {
     try {
-      addLog(`Saving "${fileName}" to ${location}...`);
+      addLog(`Opening save dialog for "${fileName}"...`);
       const result = await saveFile({
         data: content,
         fileName,
         mimeType: 'text/plain',
-        location,
-        subDirectory: subDir,
+        showDialog: true,   // ← shows the native "Save to..." picker
         isBase64: false,
-        overwrite: true,
       });
-      setLastSavedPath(result.filePath);
-      addLog(`✅ ${result.message}`);
-      Alert.alert('Saved!', result.filePath);
+      if (result.success) {
+        setLastSavedUri(result.uri);
+        addLog(`✅ ${result.message}`);
+        Alert.alert('Saved!', result.filePath);
+      } else {
+        addLog(`ℹ️ ${result.message}`); // user cancelled
+      }
     } catch (e: any) {
-      addLog(`❌ Error: ${e.message}`);
-      Alert.alert('Error', e.message);
+      addLog(`❌ ${e.message}`);
     }
   };
 
-  const handleSaveBase64 = async () => {
-    // A tiny valid 1×1 red PNG in base64
-    const pngBase64 =
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==';
+  // ---- Save silently to Downloads (no dialog) ----
+  const handleSaveSilent = async () => {
     try {
-      addLog('Saving sample PNG image...');
+      addLog('Saving silently to Downloads...');
       const result = await saveFile({
-        data: pngBase64,
-        fileName: 'sample.png',
-        mimeType: 'image/png',
-        location: 'pictures',
-        isBase64: true,
-        overwrite: true,
+        data: content,
+        fileName,
+        mimeType: 'text/plain',
+        showDialog: false,   // ← no dialog, direct save
+        location: 'downloads',
+        isBase64: false,
       });
-      setLastSavedPath(result.filePath);
+      setLastSavedUri(result.filePath);
       addLog(`✅ ${result.message}`);
-      Alert.alert('Image Saved!', result.filePath);
     } catch (e: any) {
-      addLog(`❌ Error: ${e.message}`);
-      Alert.alert('Error', e.message);
+      addLog(`❌ ${e.message}`);
     }
   };
 
-  const handleGetDirPath = async () => {
+  // ---- Save base64 PDF with dialog ----
+  const handleSavePdf = async () => {
+    // Minimal valid PDF in base64
+    const pdfBase64 = 'JVBERi0xLjQKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPJ4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNTggMDAwMDAgbiAKMDAwMDAwMDExNSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjIxMAolJUVPRgo=';
     try {
-      const path = await getDirectoryPath({ location, subDirectory: subDir });
-      setDirPath(path);
-      addLog(`📁 ${location}: ${path}`);
+      addLog('Opening save dialog for PDF...');
+      const result = await saveFile({
+        data: pdfBase64,
+        fileName: 'document.pdf',
+        mimeType: 'application/pdf',
+        showDialog: true,
+        isBase64: true,
+      });
+      if (result.success) {
+        addLog(`✅ PDF saved: ${result.message}`);
+      } else {
+        addLog(`ℹ️ ${result.message}`);
+      }
     } catch (e: any) {
-      addLog(`❌ Error: ${e.message}`);
+      addLog(`❌ ${e.message}`);
     }
   };
 
-  const handleFileExists = async () => {
-    if (!lastSavedPath) { addLog('⚠️ Save a file first.'); return; }
-    const exists = await fileExists(lastSavedPath);
-    addLog(`${exists ? '✅' : '❌'} File ${exists ? 'EXISTS' : 'NOT FOUND'}: ${lastSavedPath}`);
-  };
-
-  const handleDelete = async () => {
-    if (!lastSavedPath) { addLog('⚠️ Save a file first.'); return; }
-    const deleted = await deleteFile(lastSavedPath);
-    addLog(`${deleted ? '🗑️ Deleted' : '❌ Could not delete'}: ${lastSavedPath}`);
-    if (deleted) setLastSavedPath('');
+  // ---- Open file picker ----
+  const handleOpenPicker = async () => {
+    try {
+      addLog('Opening file picker...');
+      const picked = await openFilePicker(['text/plain', 'application/pdf']);
+      if (!picked.cancelled) {
+        addLog(`📂 Picked: ${picked.fileName} (${picked.mimeType})`);
+        if (picked.mimeType === 'text/plain') {
+          const text = await readFile(picked.uri, false);
+          addLog(`📄 Content: ${text.slice(0, 80)}...`);
+        }
+      } else {
+        addLog('ℹ️ Picker cancelled');
+      }
+    } catch (e: any) {
+      addLog(`❌ ${e.message}`);
+    }
   };
 
   return (
@@ -98,58 +105,36 @@ export default function App() {
       <Text style={styles.subtitle}>Platform: {Platform.OS}</Text>
 
       <Text style={styles.label}>File Name</Text>
-      <TextInput style={styles.input} value={fileName} onChangeText={setFileName} placeholder="my-file.txt" />
+      <TextInput style={styles.input} value={fileName} onChangeText={setFileName} />
 
       <Text style={styles.label}>File Content</Text>
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
+      <TextInput style={[styles.input, { height: 80 }]} value={content}
+        onChangeText={setContent} multiline />
 
-      <Text style={styles.label}>Sub-directory (optional)</Text>
-      <TextInput style={styles.input} value={subDir} onChangeText={setSubDir} placeholder="e.g. MyApp/Reports" />
+      {/* Primary — SAF dialog */}
+      <TouchableOpacity style={styles.btn} onPress={handleSaveWithDialog}>
+        <Text style={styles.btnText}>💾 Save — Show Native Dialog</Text>
+      </TouchableOpacity>
+      <Text style={styles.hint}>Opens the "Save to..." picker just like a real Android app</Text>
 
-      <Text style={styles.label}>Storage Location</Text>
-      <View style={styles.locationRow}>
-        {LOCATIONS.map(loc => (
-          <TouchableOpacity
-            key={loc}
-            style={[styles.locBtn, location === loc && styles.locBtnActive]}
-            onPress={() => setLocation(loc)}>
-            <Text style={[styles.locBtnText, location === loc && styles.locBtnTextActive]}>
-              {loc}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Silent save */}
+      <TouchableOpacity style={[styles.btn, { backgroundColor: '#0891b2' }]} onPress={handleSaveSilent}>
+        <Text style={styles.btnText}>⬇️ Save Silently to Downloads</Text>
+      </TouchableOpacity>
+      <Text style={styles.hint}>No dialog — saves directly in background</Text>
 
-      <TouchableOpacity style={styles.btn} onPress={handleSaveText}>
-        <Text style={styles.btnText}>💾 Save Text File</Text>
+      {/* PDF */}
+      <TouchableOpacity style={[styles.btn, { backgroundColor: '#7c3aed' }]} onPress={handleSavePdf}>
+        <Text style={styles.btnText}>📄 Save PDF with Dialog</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.btn, { backgroundColor: '#7c3aed' }]} onPress={handleSaveBase64}>
-        <Text style={styles.btnText}>🖼️ Save Sample PNG (base64)</Text>
+      {/* Open picker */}
+      <TouchableOpacity style={[styles.btn, { backgroundColor: '#059669' }]} onPress={handleOpenPicker}>
+        <Text style={styles.btnText}>📂 Open File Picker</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.btn, { backgroundColor: '#0891b2' }]} onPress={handleGetDirPath}>
-        <Text style={styles.btnText}>📂 Get Directory Path</Text>
-      </TouchableOpacity>
-
-      {!!dirPath && <Text style={styles.pathText}>📍 {dirPath}</Text>}
-
-      <View style={styles.row}>
-        <TouchableOpacity style={[styles.btn, styles.halfBtn, { backgroundColor: '#059669' }]} onPress={handleFileExists}>
-          <Text style={styles.btnText}>🔍 File Exists?</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.btn, styles.halfBtn, { backgroundColor: '#dc2626' }]} onPress={handleDelete}>
-          <Text style={styles.btnText}>🗑️ Delete File</Text>
-        </TouchableOpacity>
-      </View>
-
-      {!!lastSavedPath && (
-        <Text style={styles.pathText}>Last saved: {lastSavedPath}</Text>
+      {!!lastSavedUri && (
+        <Text style={styles.uriText} numberOfLines={2}>Last saved: {lastSavedUri}</Text>
       )}
 
       <Text style={styles.logTitle}>Log</Text>
@@ -166,29 +151,15 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#1e293b', marginBottom: 4 },
   subtitle: { fontSize: 12, color: '#64748b', marginBottom: 20 },
   label: { fontSize: 13, fontWeight: '600', color: '#475569', marginBottom: 4, marginTop: 12 },
-  input: {
-    borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8,
-    padding: 10, fontSize: 14, backgroundColor: '#fff', color: '#1e293b',
-  },
-  locationRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  locBtn: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    borderWidth: 1, borderColor: '#cbd5e1', backgroundColor: '#fff',
-  },
-  locBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  locBtnText: { fontSize: 12, color: '#475569' },
-  locBtnTextActive: { color: '#fff', fontWeight: '700' },
-  btn: {
-    backgroundColor: '#2563eb', borderRadius: 10, padding: 14,
-    alignItems: 'center', marginTop: 12,
-  },
+  input: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8,
+    padding: 10, fontSize: 14, backgroundColor: '#fff', color: '#1e293b' },
+  btn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 14,
+    alignItems: 'center', marginTop: 12 },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  row: { flexDirection: 'row', gap: 8 },
-  halfBtn: { flex: 1 },
-  pathText: {
-    fontSize: 11, color: '#64748b', marginTop: 6,
-    backgroundColor: '#f1f5f9', padding: 8, borderRadius: 6,
-  },
+  hint: { fontSize: 11, color: '#94a3b8', marginTop: 4, marginLeft: 2 },
+  uriText: { fontSize: 11, color: '#64748b', marginTop: 8,
+    backgroundColor: '#f1f5f9', padding: 8, borderRadius: 6 },
   logTitle: { fontSize: 14, fontWeight: '700', color: '#1e293b', marginTop: 20, marginBottom: 4 },
-  logEntry: { fontSize: 11, color: '#475569', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginBottom: 2 },
+  logEntry: { fontSize: 11, color: '#475569',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginBottom: 2 },
 });
