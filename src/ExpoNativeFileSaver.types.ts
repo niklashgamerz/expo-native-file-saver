@@ -14,22 +14,40 @@ export type SaveFileOptions = {
   fileName: string;
   /** MIME type e.g. "application/pdf", "image/png", "text/plain" */
   mimeType: string;
-  /** Where to save the file (default: 'downloads') */
+  /**
+   * Whether to show the native Android "Save to..." file picker dialog.
+   * Default: true — shows the SAF GUI so the user picks where to save.
+   * Set to false for a silent background save (old behaviour).
+   */
+  showDialog?: boolean;
+  // --- Options below only apply when showDialog is false ---
+  /** Where to save silently (default: 'downloads') */
   location?: StorageLocation;
   /** Sub-folder within the location e.g. "MyApp/Reports" */
   subDirectory?: string;
-  /** Required when location is 'custom' — absolute path to target directory */
+  /** Required when location is 'custom' */
   customPath?: string;
   /** If true, treats data as base64 encoded. Default: false */
   isBase64?: boolean;
-  /** If true and file already exists, overwrite it. Default: true */
+  /** Overwrite if file exists. Default: true */
   overwrite?: boolean;
 };
 
 export type SaveFileResult = {
   success: boolean;
+  /** Absolute file path or SAF content URI */
   filePath: string;
+  /** SAF content URI (set when showDialog: true) */
+  uri: string;
   message: string;
+};
+
+export type OpenFileResult = {
+  cancelled: boolean;
+  /** SAF content URI of the picked file */
+  uri: string;
+  fileName: string;
+  mimeType: string;
 };
 
 export type GetDirectoryPathOptions = {
