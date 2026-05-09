@@ -1,6 +1,7 @@
 {
   "name": "expo-native-file-saver",
   "version": "1.0.0",
+  "main": "build/index",
   "author": "niklashgamerz",
   "license": "MIT",
   "repository": {
