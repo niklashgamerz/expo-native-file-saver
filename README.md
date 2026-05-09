@@ -5,7 +5,7 @@
 **Save files natively to Downloads, Documents, Pictures and more — on Android & iOS.**
 
 [![npm version](https://img.shields.io/npm/v/expo-native-file-saver?color=blue&style=flat-square)](https://www.npmjs.com/package/expo-native-file-saver)
-[![license](https://img.shields.io/github/license/niklashgamerz/expo-native-file-saver?style=flat-square)](LICENSE)
+[![license: MIT](https://img.shields.io/npm/l/expo-native-file-saver?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-green?style=flat-square)](https://github.com/niklashgamerz/expo-native-file-saver)
 [![expo](https://img.shields.io/badge/Expo%20SDK-49%2B-blueviolet?style=flat-square)](https://expo.dev)
 
