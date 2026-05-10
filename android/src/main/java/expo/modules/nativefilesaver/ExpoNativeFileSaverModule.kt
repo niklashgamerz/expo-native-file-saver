@@ -27,9 +27,7 @@ class SaveFileOptionsRecord : Record {
   @Field val data: String = ""
   @Field val fileName: String = ""
   @Field val mimeType: String = "application/octet-stream"
-  // SAF dialog (default true = shows native "Save to..." picker)
   @Field val showDialog: Boolean = true
-  // Silent-save fallback fields (used when showDialog = false)
   @Field val location: String = "downloads"
   @Field val subDirectory: String = ""
   @Field val customPath: String = ""
@@ -54,11 +52,19 @@ class ExpoNativeFileSaverModule : Module() {
     private const val REQ_OPEN = 9422
   }
 
-  // Pending activity-result callbacks
-  private val saveCallbacks = mutableMapOf<Int, (Int, Intent?) -> Unit>()
+  // Callbacks keyed by request code — populated before startActivityForResult
+  private val activityCallbacks = mutableMapOf<Int, (Int, Intent?) -> Unit>()
 
   override fun definition() = ModuleDefinition {
     Name("ExpoNativeFileSaver")
+
+    // Wire up OnActivityResult so we receive the SAF picker result
+    OnActivityResult { _, payload ->
+      activityCallbacks[payload.requestCode]?.let { cb ->
+        activityCallbacks.remove(payload.requestCode)
+        cb.invoke(payload.resultCode, payload.data)
+      }
+    }
 
     // -----------------------------------------------------------------------
     // saveFile
@@ -72,19 +78,16 @@ class ExpoNativeFileSaverModule : Module() {
       else
         options.data.toByteArray(Charsets.UTF_8)
 
-      // Silent save — no dialog, same as old behaviour
+      // Silent save — no dialog
       if (!options.showDialog) {
         return@AsyncFunction if (
           Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
           options.location in listOf("downloads", "pictures", "music", "movies")
-        ) {
-          saveViaMediaStore(context, options, bytes)
-        } else {
-          saveViaFile(context, options, bytes)
-        }
+        ) saveViaMediaStore(context, options, bytes)
+        else saveViaFile(context, options, bytes)
       }
 
-      // ---- SAF: show the native "Save to…" dialog -------------------------
+      // SAF "Save to…" dialog
       val activity = appContext.activityProvider?.currentActivity
         ?: throw Exception("No active Activity — cannot show SAF dialog")
 
@@ -96,13 +99,11 @@ class ExpoNativeFileSaverModule : Module() {
 
       val latch = CountDownLatch(1)
       var result: Map<String, Any> = mapOf(
-        "success" to false,
-        "filePath" to "",
-        "uri" to "",
+        "success" to false, "filePath" to "", "uri" to "",
         "message" to "User cancelled"
       )
 
-      appContext.registerForActivityResult(REQ_SAVE) { resultCode, data ->
+      activityCallbacks[REQ_SAVE] = { resultCode, data ->
         if (resultCode == Activity.RESULT_OK) {
           val uri: Uri? = data?.data
           if (uri == null) {
@@ -133,7 +134,7 @@ class ExpoNativeFileSaverModule : Module() {
     }
 
     // -----------------------------------------------------------------------
-    // openFilePicker — SAF "Open" dialog, returns URI + metadata
+    // openFilePicker
     // -----------------------------------------------------------------------
     AsyncFunction("openFilePicker") { mimeTypes: List<String> ->
       val activity = appContext.activityProvider?.currentActivity
@@ -149,17 +150,20 @@ class ExpoNativeFileSaverModule : Module() {
       }
 
       val latch = CountDownLatch(1)
-      var result: Map<String, Any> = mapOf("cancelled" to true, "uri" to "",
-        "fileName" to "", "mimeType" to "")
+      var result: Map<String, Any> = mapOf(
+        "cancelled" to true, "uri" to "", "fileName" to "", "mimeType" to ""
+      )
 
-      appContext.registerForActivityResult(REQ_OPEN) { resultCode, data ->
+      activityCallbacks[REQ_OPEN] = { resultCode, data ->
         if (resultCode == Activity.RESULT_OK) {
           val uri = data?.data
           if (uri != null) {
             val mime = context.contentResolver.getType(uri) ?: "*/*"
             val name = resolveFileName(context, uri)
-            result = mapOf("cancelled" to false, "uri" to uri.toString(),
-              "fileName" to name, "mimeType" to mime)
+            result = mapOf(
+              "cancelled" to false, "uri" to uri.toString(),
+              "fileName" to name, "mimeType" to mime
+            )
           }
         }
         latch.countDown()
@@ -171,7 +175,7 @@ class ExpoNativeFileSaverModule : Module() {
     }
 
     // -----------------------------------------------------------------------
-    // readFile — read a SAF URI as text or base64
+    // readFile
     // -----------------------------------------------------------------------
     AsyncFunction("readFile") { uriString: String, asBase64: Boolean ->
       val context = appContext.reactContext
@@ -193,16 +197,8 @@ class ExpoNativeFileSaverModule : Module() {
         .absolutePath
     }
 
-    // -----------------------------------------------------------------------
-    // fileExists
-    // -----------------------------------------------------------------------
-    AsyncFunction("fileExists") { filePath: String ->
-      File(filePath).exists()
-    }
+    AsyncFunction("fileExists") { filePath: String -> File(filePath).exists() }
 
-    // -----------------------------------------------------------------------
-    // deleteFile
-    // -----------------------------------------------------------------------
     AsyncFunction("deleteFile") { filePath: String ->
       val file = File(filePath)
       if (file.exists()) file.delete() else false
@@ -213,9 +209,7 @@ class ExpoNativeFileSaverModule : Module() {
   // Silent MediaStore save (Android 10+)
   // -------------------------------------------------------------------------
   private fun saveViaMediaStore(
-    context: Context,
-    options: SaveFileOptionsRecord,
-    bytes: ByteArray
+    context: Context, options: SaveFileOptionsRecord, bytes: ByteArray
   ): Map<String, Any> {
     val collection = when (options.location) {
       "pictures" -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
@@ -223,15 +217,12 @@ class ExpoNativeFileSaverModule : Module() {
       "movies"   -> MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
       else       -> MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
     }
-
-    val relPath = buildRelativePath(
-      when (options.location) {
-        "pictures" -> Environment.DIRECTORY_PICTURES
-        "music"    -> Environment.DIRECTORY_MUSIC
-        "movies"   -> Environment.DIRECTORY_MOVIES
-        else       -> Environment.DIRECTORY_DOWNLOADS
-      }, options.subDirectory
-    )
+    val relPath = buildRelativePath(when (options.location) {
+      "pictures" -> Environment.DIRECTORY_PICTURES
+      "music"    -> Environment.DIRECTORY_MUSIC
+      "movies"   -> Environment.DIRECTORY_MOVIES
+      else       -> Environment.DIRECTORY_DOWNLOADS
+    }, options.subDirectory)
 
     val cv = ContentValues().apply {
       put(MediaStore.MediaColumns.DISPLAY_NAME, options.fileName)
@@ -239,43 +230,32 @@ class ExpoNativeFileSaverModule : Module() {
       put(MediaStore.MediaColumns.RELATIVE_PATH, relPath)
       put(MediaStore.MediaColumns.IS_PENDING, 1)
     }
-
     val resolver = context.contentResolver
     val uri = resolver.insert(collection, cv)
       ?: throw Exception("MediaStore insert failed for ${options.fileName}")
-
     resolver.openOutputStream(uri)?.use { it.write(bytes) }
-      ?: throw Exception("Cannot open output stream")
-
-    cv.clear()
-    cv.put(MediaStore.MediaColumns.IS_PENDING, 0)
+    cv.clear(); cv.put(MediaStore.MediaColumns.IS_PENDING, 0)
     resolver.update(uri, cv, null, null)
-
     val filePath = resolver.query(uri, arrayOf(MediaStore.MediaColumns.DATA),
       null, null, null)?.use { c ->
       if (c.moveToFirst()) c.getString(0) else uri.toString()
     } ?: uri.toString()
-
     return mapOf("success" to true, "filePath" to filePath, "uri" to uri.toString(),
       "message" to "Saved to ${options.location}: ${options.fileName}")
   }
 
   // -------------------------------------------------------------------------
-  // Silent direct File save (pre-Q or app-private dirs)
+  // Silent direct File save
   // -------------------------------------------------------------------------
   private fun saveViaFile(
-    context: Context,
-    options: SaveFileOptionsRecord,
-    bytes: ByteArray
+    context: Context, options: SaveFileOptionsRecord, bytes: ByteArray
   ): Map<String, Any> {
     val dir = resolveDirectory(context, options.location, options.subDirectory, options.customPath)
     if (!dir.exists()) dir.mkdirs()
-
     val file = File(dir, options.fileName)
     if (file.exists() && !options.overwrite)
       return mapOf("success" to false, "filePath" to file.absolutePath, "uri" to "",
         "message" to "File already exists and overwrite is disabled.")
-
     FileOutputStream(file).use { it.write(bytes) }
     return mapOf("success" to true, "filePath" to file.absolutePath, "uri" to "",
       "message" to "Saved to ${file.absolutePath}")
@@ -301,8 +281,8 @@ class ExpoNativeFileSaverModule : Module() {
     return if (subDirectory.isNotBlank()) File(base, subDirectory) else base
   }
 
-  private fun buildRelativePath(base: String, subDirectory: String): String =
-    if (subDirectory.isNotBlank()) "$base/$subDirectory" else base
+  private fun buildRelativePath(base: String, sub: String) =
+    if (sub.isNotBlank()) "$base/$sub" else base
 
   private fun resolveFileName(context: Context, uri: Uri): String {
     context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
