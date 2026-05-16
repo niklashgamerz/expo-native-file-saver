@@ -58,8 +58,8 @@
   },
   "dependencies": {
     "expo-image-manipulator": "~55.0.0",
-    "expo-native-file-saver": "1.5.0",
-    "expo-pilot": "1.0.0",
+    "expo-native-file-saver": "2.0.1",
+    "expo-pilot": "1.0.2",
     "react-native-webview": "^13.16.1"
   }
 }

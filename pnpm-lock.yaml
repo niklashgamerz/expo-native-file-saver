@@ -402,11 +402,11 @@ importers:
         specifier: ~55.0.0
         version: 55.0.16(expo@54.0.34)
       expo-native-file-saver:
-        specifier: 1.5.0
-        version: 1.5.0
+        specifier: 2.0.1
+        version: 2.0.1
       expo-pilot:
-        specifier: 1.0.0
-        version: 1.0.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+        specifier: 1.0.2
+        version: 1.0.2(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-webview:
         specifier: ^13.16.1
         version: 13.16.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -3439,11 +3439,11 @@ packages:
       react-native-worklets:
         optional: true
 
-  expo-native-file-saver@1.5.0:
-    resolution: {integrity: sha512-aZLqQLqCh5pQY1098qOo311hF+c0UmSUa0RgtJZ8eubjHw/vX/3tQDqM+WZ4SQZLy1UPBKQORL7eLhBLzcL8MA==}
+  expo-native-file-saver@2.0.1:
+    resolution: {integrity: sha512-2/ia6UAzkVfxdzHH+LhMxUkHRJs80JlVQMBKjQZbk4o6nw28l0OoRhGYbcbfmwNzGUiINSDHTYNAz/4hkf2RTw==}
 
-  expo-pilot@1.0.0:
-    resolution: {integrity: sha512-jZNlr+jbJLqWh3ydk1rDDJRRWysZUAbOo094+teY1UiNEJn3S0t75bhNn9ozKuywqAzYYL46uDXhK3tie40A7g==}
+  expo-pilot@1.0.2:
+    resolution: {integrity: sha512-vwlf7AtRqj6uhOzmu2zmq1VIYguTv6/PHJLexFeEL1NnxIXxYVFEwadGn1HmFugkywxggPx03dlvj3haSnV3NA==}
     peerDependencies:
       expo: '*'
       react: '*'
@@ -9303,9 +9303,9 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
 
-  expo-native-file-saver@1.5.0: {}
+  expo-native-file-saver@2.0.1: {}
 
-  expo-pilot@1.0.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+  expo-pilot@1.0.2(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:
       expo: 54.0.34(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native-webview@13.16.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
       expo-modules-core: 55.0.25(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
