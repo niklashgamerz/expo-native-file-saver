@@ -1,0 +1,28 @@
+[Incubating] Problems report is available at: file:///home/expo/workingdir/build/discord-gen/discord-gen/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+* What went wrong:
+Could not determine the dependencies of task ':app:mergeReleaseNativeLibs'.
+> Could not resolve all dependencies for configuration ':app:releaseRuntimeClasspath'.
+> Could not resolve project :expo-native-file-saver.
+     Required by:
+         project :app > project :expo
+      > No matching variant of project :expo-native-file-saver was found. The consumer was configured to find a library for use during runtime, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.11.0', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'release', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :expo-pilot.
+     Required by:
+         project :app > project :expo
+      > No matching variant of project :expo-pilot was found. The consumer was configured to find a library for use during runtime, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.11.0', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'release', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+* Try:
+> Creating consumable variants is explained in more detail at https://docs.gradle.org/8.14.3/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs.
+> Review the variant matching algorithm at https://docs.gradle.org/8.14.3/userguide/variant_attributes.html#sec:abm_algorithm.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+BUILD FAILED in 1m 51s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+24 actionable tasks: 24 executed
+Error: Gradle build failed with unknown error. See logs for the "Run gradlew" phase for more information.
