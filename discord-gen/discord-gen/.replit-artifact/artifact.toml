@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Discord Gen"
+version = "1.0.0"
+id = "artifacts/discord-gen"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 24077
+
+[services.development]
+run = "pnpm --filter @workspace/discord-gen run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/discord-gen", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/discord-gen", "run", "serve" ]
+
+[services.env]
+PORT = "24077"
+BASE_PATH = "/"

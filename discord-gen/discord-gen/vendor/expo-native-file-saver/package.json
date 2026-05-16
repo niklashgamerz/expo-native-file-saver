@@ -1,0 +1,15 @@
+{
+  "name": "expo-native-file-saver",
+  "version": "1.5.0",
+  "main": "build/index",
+  "author": "niklashgamerz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niklashgamerz/expo-native-file-saver.git"
+  },
+  "homepage": "https://github.com/niklashgamerz/expo-native-file-saver#readme",
+  "bugs": {
+    "url": "https://github.com/niklashgamerz/expo-native-file-saver/issues"
+  }
+}
