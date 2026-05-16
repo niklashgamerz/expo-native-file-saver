@@ -1,0 +1,74 @@
+~/workspace/expo-native-file-saver$ # expo-pilot
+cd /home/runner/workspace/expo-pilot
+git add android/build.gradle package.json
+git commit -m "fix: replace lintOptions with lint for AGP 8.x compatibility"
+git push origin main
+npm publish
+
+# expo-native-file-saver
+cd /home/runner/workspace/expo-native-file-saver
+git add android/build.gradle package.json
+git commit -m "fix: replace lintOptions with lint for AGP 8.x compatibility"
+git push origin main
+npm publish
+On branch main
+nothing to commit, working tree clean
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+
+> expo-pilot@1.0.2 prepublishOnly
+> expo-module prepublishOnly
+
+sh: 1: expo-module: not found
+npm error code 127
+npm error path /home/runner/workspace/expo-pilot
+npm error command failed
+npm error command sh -c expo-module prepublishOnly
+npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-05-16T11_04_55_500Z-debug-0.log
+On branch main
+nothing to commit, working tree clean
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+npm warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+npm warn publish errors corrected:
+npm warn publish "repository.url" was normalized to "git+https://github.com/niklashgamerz/expo-native-file-saver.git"
+npm notice
+npm notice 📦  expo-native-file-saver@2.0.1
+npm notice Tarball Contents
+npm notice 1.1kB LICENSE
+npm notice 8.0kB README.md
+npm notice 292B android/build.gradle
+npm notice 419B android/src/main/AndroidManifest.xml
+npm notice 12.3kB android/src/main/java/expo/modules/nativefilesaver/ExpoNativeFileSaverModule.kt
+npm notice 6.6kB example/App.tsx
+npm notice 108B example/babel.config.js
+npm notice 1.1kB example/metro.config.js
+npm notice 204B example/tsconfig.json
+npm notice 461B example/webpack.config.js
+npm notice 204B expo-module.config.json
+npm notice 746B ios/ExpoNativeFileSaver.podspec
+npm notice 6.7kB ios/ExpoNativeFileSaverModule.swift
+npm notice 423B package.json
+npm notice 1.6kB src/ExpoNativeFileSaver.types.ts
+npm notice 233B src/ExpoNativeFileSaverModule.ts
+npm notice 2.7kB src/index.ts
+npm notice 239B tsconfig.json
+npm notice Tarball Details
+npm notice name: expo-native-file-saver
+npm notice version: 2.0.1
+npm notice filename: expo-native-file-saver-2.0.1.tgz
+npm notice package size: 12.7 kB
+npm notice unpacked size: 43.4 kB
+npm notice shasum: 1e761da571365e2091985b44b9ebf6a7e58e62c4
+npm notice integrity: sha512-2/ia6UAzkVfxd[...]YNAz/4hkf2RTw==
+npm notice total files: 18
+npm notice
+npm error You cannot publish over the previously published versions: 2.0.1.
+npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-05-16T11_04_55_860Z-debug-0.log
+~/workspace/expo-native-file-saver$ 
