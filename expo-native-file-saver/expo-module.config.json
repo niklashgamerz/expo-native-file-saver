@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ExpoNativeFileSaverModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nativefilesaver.ExpoNativeFileSaverModule"]
+  }
+}

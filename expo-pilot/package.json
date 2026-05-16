@@ -1,0 +1,52 @@
+{
+  "name": "expo-pilot",
+  "version": "1.0.2",
+  "description": "Android UI automation via Accessibility Service — tap, swipe, type, find elements across any app",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "tsc",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module",
+    "open:ios": "xed example/ios",
+    "open:android": "open -a \"Android Studio\" example/android"
+  },
+  "keywords": [
+    "expo",
+    "expo-module",
+    "automation",
+    "accessibility",
+    "android",
+    "tap",
+    "swipe",
+    "ui-control"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niklashgamerz/expo-pilot.git"
+  },
+  "bugs": {
+    "url": "/issues"
+  },
+  "author": "niklashgamerz",
+  "license": "MIT",
+  "homepage": "#readme",
+  "dependencies": {
+    "expo-modules-core": "^55.0.25"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.1",
+    "expo": "^55.0.20",
+    "expo-module-scripts": "^55.0.2",
+    "react-native": "0.82.1"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

@@ -1,0 +1,16 @@
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'expo.modules.pilot'
+version = '1.0.2'
+
+android {
+  namespace "expo.modules.pilot"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.2"
+  }
+  lint {
+    abortOnError false
+  }
+}
